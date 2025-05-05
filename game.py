@@ -19,6 +19,8 @@ class Game:
 
     def run(self):
         while self.running:
+            current_time = pg.time.get_ticks()
+
             # Events
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -27,9 +29,15 @@ class Game:
                     if event.key == pg.K_RETURN:
                         self.window.get_text()
                     elif event.key == pg.K_BACKSPACE:
+                        self.window.backspace_held = True
                         self.window.backspace()
+                        # If backspace is held for longer than backspace_delay ms, we want to start deleting multiple characters
+                        self.window.backspace_timer = current_time + self.window.backspace_delay
                     else:
                         self.window.key_typed(event.unicode)
+                elif event.type == pg.KEYUP:
+                    if event.key == pg.K_BACKSPACE:
+                        self.window.backspace_held = False
 
             # Updates
             self.window.update()

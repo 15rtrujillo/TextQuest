@@ -20,6 +20,20 @@ class GameWindow:
         self.active = True
         self.text_manager = TextManager(self.screen, self.font, self.text_color)
 
+        # Insertion point
+        self.insertion_point_visible = True
+        self.insertion_point_last_blink = 0
+        self.insertion_point_interval = 500
+        self.insertion_point_height = self.font.get_linesize() - 18
+        self.insertion_point_width = 15
+
+        # Backspace
+        self.backspace_held = False
+        self.backspace_timer = 0
+        self.backspace_delay = 200
+        self.backspace_repeat_rate = 50
+
+
     def display_text(self, text: str, end: str = "\n"):
         """Adds text to the display log immediately.
         :param str text: The text to add
@@ -43,7 +57,8 @@ class GameWindow:
     
     def backspace(self):
         """Called when the backspace key is pressed"""
-        self.input_text = self.input_text[:-1]
+        if self.input_text:
+            self.input_text = self.input_text[:-1]
 
     def key_typed(self, unicode: str):
         """Called when any alphanumeric key is pressed
@@ -51,8 +66,20 @@ class GameWindow:
         self.input_text += unicode
 
     def update(self):
-        """Update the text manager"""
+        """Update the window"""
+        current_time = pg.time.get_ticks()
+
         self.text_manager.update()
+
+        # Blink insertion point
+        if current_time - self.insertion_point_last_blink > self.insertion_point_interval:
+            self.insertion_point_visible = not self.insertion_point_visible
+            self.insertion_point_last_blink = current_time
+
+        # Delete multiple characters
+        if self.backspace_held and current_time >= self.backspace_timer and self.input_text:
+            self.backspace()
+            self.backspace_timer = current_time + self.backspace_repeat_rate
 
     def draw(self):
         """Draws the screen"""
@@ -63,3 +90,8 @@ class GameWindow:
         input_surface = self.font.render(f"> {self.input_text}", True, self.text_color)
         input_rect = input_surface.get_rect(bottomleft=(10, self.window_y - 10))
         self.screen.blit(input_surface, input_rect)
+
+        if self.insertion_point_visible:
+            cursor_x = input_rect.right + 2
+            cursor_y = input_rect.top + 10
+            pg.draw.rect(self.screen, self.text_color, (cursor_x, cursor_y, self.insertion_point_width, self.insertion_point_height))
