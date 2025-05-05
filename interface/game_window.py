@@ -1,7 +1,6 @@
-from interface.text_manager import TextManager, TextToAdd, TextToTypewrite
-
-
 import pygame as pg
+
+from interface.text_manager import TextManager, TextToAdd, TextToTypewrite
 
 
 class GameWindow:
@@ -35,34 +34,42 @@ class GameWindow:
 
 
     def display_text(self, text: str, end: str = "\n"):
-        """Adds text to the display log immediately.
+        """
+        Adds text to the display log immediately.
         :param str text: The text to add
-        :param str end: The character to append to the end of the text"""
+        :param str end: The character to append to the end of the text
+        """
         self.text_manager.add(TextToAdd(text, end))
 
     def display_typewritten_text(self, text: str, delay: int, end: str = "\n"):
-        """Adds text to the queue to be displayed with a typewriting effect.
+        """
+        Adds text to the queue to be displayed with a typewriting effect.
         :param str text: The text to add
         :param int delay: The delay between adding each character to the screen (in milliseconds)
-        :param str end: The character to append to the end of the text"""
+        :param str end: The character to append to the end of the text
+        """
         self.text_manager.add(TextToTypewrite(text, delay, end))
 
     def get_text(self) -> str:
-        """Gets the current input text and clears the input.
+        """
+        Gets the current input text and clears the input.
         :rtype: str
-        :return: The text the user has entered"""
+        :return: The text the user has entered
+        """
         submitted_text = self.input_text
         self.input_text = ""
         return submitted_text
-    
+
     def backspace(self):
         """Called when the backspace key is pressed"""
         if self.input_text:
             self.input_text = self.input_text[:-1]
 
     def key_typed(self, unicode: str):
-        """Called when any alphanumeric key is pressed
-        :param str unicode: The unicode for the pressed key"""
+        """
+        Called when any alphanumeric key is pressed
+        :param str unicode: The unicode for the pressed key
+        """
         self.input_text += unicode
 
     def update(self):
@@ -94,4 +101,5 @@ class GameWindow:
         if self.insertion_point_visible:
             cursor_x = input_rect.right + 2
             cursor_y = input_rect.top + 10
-            pg.draw.rect(self.screen, self.text_color, (cursor_x, cursor_y, self.insertion_point_width, self.insertion_point_height))
+            pg.draw.rect(self.screen, self.text_color, (cursor_x, cursor_y,
+            self.insertion_point_width, self.insertion_point_height))

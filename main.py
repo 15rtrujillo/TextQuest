@@ -1,10 +1,10 @@
+import pygame as pg
+
 from game import Game
 
 
-import pygame as pg
-
-
 def main():
+    """Main entrypoint"""
     pg.init()
     game = Game()
     game.run()

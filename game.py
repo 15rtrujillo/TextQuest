@@ -1,9 +1,8 @@
+import pygame as pg
+
 from interface.game_window import GameWindow
 from model.entity.player import Player
 from model.world.world import World
-
-
-import pygame as pg
 
 
 class Game:
@@ -18,6 +17,7 @@ class Game:
         self.running = True
 
     def run(self):
+        """Run the main game loop"""
         while self.running:
             current_time = pg.time.get_ticks()
 
@@ -31,7 +31,8 @@ class Game:
                     elif event.key == pg.K_BACKSPACE:
                         self.window.backspace_held = True
                         self.window.backspace()
-                        # If backspace is held for longer than backspace_delay ms, we want to start deleting multiple characters
+                        # If backspace is held for longer than backspace_delay ms,
+                        # we want to start deleting multiple characters
                         self.window.backspace_timer = current_time + self.window.backspace_delay
                     else:
                         self.window.key_typed(event.unicode)
@@ -45,7 +46,7 @@ class Game:
             # Drawing
             self.window.draw()
             pg.display.flip()
-            
+
         pg.quit()
 
 

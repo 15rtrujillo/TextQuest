@@ -9,6 +9,7 @@ class Player:
         self.name = name
         self.gold = 100
         self.hp = 100
+        self.max_hp = 100
         self.level = 1
         self.xp = 0
         self.region = 0

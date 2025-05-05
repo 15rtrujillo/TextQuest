@@ -1,7 +1,5 @@
-from external.npc_def import NpcDef
-
-
 import model.world.room as room
+from external.npc_def import NpcDef
 
 
 class Npc:
@@ -15,5 +13,5 @@ class Npc:
         """
         self.id = npc_def.id
         self.npc_def = npc_def
-        self.hp = self.npc_def.maxHp
+        self.hp = self.npc_def.max_hp
         self.location = location

@@ -1,6 +1,11 @@
+"""Contains constant lists of words that can be used for parsing player input"""
+
 YES = ["yes", "y"]
 NO = ["no", "n"]
-DIRECTIONS = ["north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest", "up", "down"]
+DIRECTIONS = [
+    "north", "northeast", "east", "southeast", "south",
+    "southwest", "west", "northwest", "up", "down"
+    ]
 TRAVEL = ["go", "travel", "head", "walk"]
 TALK = ["speak", "talk", "approach"]
 ATTACK = ["fight", "attack", "battle"]

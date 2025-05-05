@@ -1,8 +1,6 @@
-from external.room_def import RoomDef
-
-
 import model.entity.npc as npc
 import model.world.region as region
+from external.room_def import RoomDef
 
 
 class Room:
