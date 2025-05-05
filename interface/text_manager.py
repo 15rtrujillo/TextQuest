@@ -10,9 +10,10 @@ class TextToAdd:
         """
         An object that stores text to add to the screen
         :param str text: The text to add
-        :param str end: The character to append to the end of the text
         """
         self.text = text
+        self.index: int = -1
+
 
 class TextToTypewrite(TextToAdd):
     """Text to be typewritten to the screen"""
@@ -22,13 +23,13 @@ class TextToTypewrite(TextToAdd):
         An object that stores text to typewrite to the screen
         :param str text: The text to add
         :param int delay: The delay between adding each character to the screen (in milliseconds)
-        :param str end: The character to append to the end of the text
         """
         super().__init__(text)
         self.delay = delay
         self.current_index = 0
         self.last_update_time = 0
         self.typing_complete = False
+
 
 class TextManager:
     """An object to manage the text that gets added to the screen"""
@@ -48,34 +49,49 @@ class TextManager:
         self.line_spacing = 25
         self.padding = 10
 
-    def add(self, text_obj: TextToAdd):
+    def add(self, text_to_add: TextToAdd):
         """
         Add text to the queue to be added to the screen
-        :param TextToAdd text_obj: The text object to be added to the queue
+        :param TextToAdd text_to_add: The text object to be added to the queue
         """
-        self.queue.append(text_obj)
+        self.queue.append(text_to_add)
+
+    def clear(self):
+        self.queue.clear()
+        self.displayed_lines.clear()
 
     def update(self):
         """Updates the display based on the text queue."""
-        new_lines = []
-        for item in list(self.queue):  # Iterate over a copy to allow removal
+        for item in list(self.queue):
             if isinstance(item, TextToTypewrite):
                 current_time = pg.time.get_ticks()
+                # If we aren't done typing out this item,
+                # and enough time has passed, append another letter
                 if not item.typing_complete and current_time - item.last_update_time > item.delay:
                     item.current_index += 1
                     item.last_update_time = current_time
+                    # If we've reached the end of the text, we're done
                     if item.current_index >= len(item.text):
                         item.typing_complete = True
+                # Create the surface
                 text_to_render = item.text[:item.current_index]
                 text_surface = self.font.render(text_to_render, True, self.text_color)
+                # Remove the item if we're done typing it
                 if item.typing_complete and item in self.queue:
                     self.queue.remove(item)
-                new_lines.append(text_surface)
+                if item.index == -1:
+                    self.displayed_lines.append(text_surface)
+                    item.index = len(self.displayed_lines) - 1
+                else:
+                    self.displayed_lines[item.index] = text_surface
             elif isinstance(item, TextToAdd):
                 text_surface = self.font.render(item.text, True, self.text_color)
-                new_lines.append(text_surface)
+                if item.index == -1:
+                    self.displayed_lines.append(text_surface)
+                    item.index = len(self.displayed_lines) - 1
+                else:
+                    self.displayed_lines[item.index] = text_surface
                 self.queue.remove(item)
-        self.displayed_lines.extend(new_lines)
 
     def draw(self):
         """Draws the currently displayed text on the screen."""

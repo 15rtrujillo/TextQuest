@@ -32,21 +32,18 @@ class GameWindow:
         self.backspace_delay = 200
         self.backspace_repeat_rate = 50
 
-
     def display_text(self, text: str):
         """
         Adds text to the display log immediately.
         :param str text: The text to add
-        :param str end: The character to append to the end of the text
         """
         self.text_manager.add(TextToAdd(text))
 
-    def display_typewritten_text(self, text: str, delay: int = 0.05):
+    def display_typewritten_text(self, text: str, delay: int = 50):
         """
         Adds text to the queue to be displayed with a typewriting effect.
         :param str text: The text to add
         :param int delay: The delay between adding each character to the screen (in milliseconds)
-        :param str end: The character to append to the end of the text
         """
         self.text_manager.add(TextToTypewrite(text, delay))
 
