@@ -1,6 +1,7 @@
 import pygame as pg
 
 from interface.game_window import GameWindow
+from interface.screens.screen import Screen
 from model.entity.player import Player
 from model.world.world import World
 
@@ -14,6 +15,8 @@ class Game:
         self.world: World = World()
         self.player: Player | None = None
         self.window: GameWindow = GameWindow()
+        self.current_screen: Screen | None = None
+        self.next_screen: Screen | None = None
         self.running = True
 
     def run(self):
@@ -27,7 +30,7 @@ class Game:
                     self.running = False
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_RETURN:
-                        self.window.get_text()
+                        self.process_input(self.window.get_text())
                     elif event.key == pg.K_BACKSPACE:
                         self.window.backspace_held = True
                         self.window.backspace()
@@ -48,6 +51,9 @@ class Game:
             pg.display.flip()
 
         pg.quit()
+
+    def process_input(self, user_input: str):
+        self.window.display_typewritten_text(user_input)
 
 
 def parse_int_input(text_to_parse: str, number_of_choices: int = 0) -> int:

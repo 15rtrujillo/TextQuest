@@ -6,27 +6,25 @@ import pygame as pg
 class TextToAdd:
     """Text to be added to the screen"""
 
-    def __init__(self, text: str, end: str = "\n"):
+    def __init__(self, text: str):
         """
         An object that stores text to add to the screen
         :param str text: The text to add
         :param str end: The character to append to the end of the text
         """
         self.text = text
-        self.end = end
-        self.total_delay = 0
 
 class TextToTypewrite(TextToAdd):
     """Text to be typewritten to the screen"""
 
-    def __init__(self, text: str, delay: int, end: str = "\n"):
+    def __init__(self, text: str, delay: int):
         """
         An object that stores text to typewrite to the screen
         :param str text: The text to add
         :param int delay: The delay between adding each character to the screen (in milliseconds)
         :param str end: The character to append to the end of the text
         """
-        super().__init__(text, end)
+        super().__init__(text)
         self.delay = delay
         self.current_index = 0
         self.last_update_time = 0
@@ -68,21 +66,21 @@ class TextManager:
                     item.last_update_time = current_time
                     if item.current_index >= len(item.text):
                         item.typing_complete = True
-                text_to_render = item.text[:item.current_index] + (item.end if item.typing_complete else "")
+                text_to_render = item.text[:item.current_index]
                 text_surface = self.font.render(text_to_render, True, self.text_color)
                 if item.typing_complete and item in self.queue:
                     self.queue.remove(item)
                 new_lines.append(text_surface)
             elif isinstance(item, TextToAdd):
-                text_surface = self.font.render(item.text + item.end, True, self.text_color)
+                text_surface = self.font.render(item.text, True, self.text_color)
                 new_lines.append(text_surface)
                 self.queue.remove(item)
         self.displayed_lines.extend(new_lines)
 
     def draw(self):
         """Draws the currently displayed text on the screen."""
-        y_offset = self.screen.get_height() - 100  # Start drawing text above the input box
-        for line_surface in reversed(self.displayed_lines):
-            text_rect = line_surface.get_rect(bottomleft=(self.padding, y_offset))
+        y_offset = 5
+        for line_surface in self.displayed_lines:
+            text_rect = line_surface.get_rect(topleft=(self.padding, y_offset))
             self.screen.blit(line_surface, text_rect)
-            y_offset -= self.line_spacing
+            y_offset += self.line_spacing

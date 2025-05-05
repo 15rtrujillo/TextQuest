@@ -24,7 +24,7 @@ class GameWindow:
         self.insertion_point_last_blink = 0
         self.insertion_point_interval = 500
         self.insertion_point_height = self.font.get_linesize() - 18
-        self.insertion_point_width = 15
+        self.insertion_point_width = 12
 
         # Backspace
         self.backspace_held = False
@@ -33,22 +33,22 @@ class GameWindow:
         self.backspace_repeat_rate = 50
 
 
-    def display_text(self, text: str, end: str = "\n"):
+    def display_text(self, text: str):
         """
         Adds text to the display log immediately.
         :param str text: The text to add
         :param str end: The character to append to the end of the text
         """
-        self.text_manager.add(TextToAdd(text, end))
+        self.text_manager.add(TextToAdd(text))
 
-    def display_typewritten_text(self, text: str, delay: int, end: str = "\n"):
+    def display_typewritten_text(self, text: str, delay: int = 0.05):
         """
         Adds text to the queue to be displayed with a typewriting effect.
         :param str text: The text to add
         :param int delay: The delay between adding each character to the screen (in milliseconds)
         :param str end: The character to append to the end of the text
         """
-        self.text_manager.add(TextToTypewrite(text, delay, end))
+        self.text_manager.add(TextToTypewrite(text, delay))
 
     def get_text(self) -> str:
         """
