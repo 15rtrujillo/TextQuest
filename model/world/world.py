@@ -1,14 +1,11 @@
+import input_output.file_utils as file_utils
+import input_output.game_data_loader as game_data_loader
 from external.npc_def import NpcDef
 from external.region_def import RegionDef
-from external.room_def import RoomDef
 from input_output.logger.log_manager import LogManager
 from model.entity.npc import Npc
 from model.world.region import Region
 from model.world.room import Room
-
-
-import input_output.file_utils as file_utils
-import input_output.game_data_loader as game_data_loader
 
 
 class World:
@@ -34,7 +31,7 @@ class World:
                 continue
 
             # Make sure a region with this ID doesn't already exist
-            if new_region_def.id in self.region_defs.keys():
+            if new_region_def.id in self.region_defs:
                 LogManager.get_logger().warn(f"The region {new_region_def.name} has the same ID as "
                                              f"{self.region_defs[new_region_def.id].name} (ID: "
                                              f"{new_region_def.id})\n{new_region_def.name} was not loaded.")
@@ -55,7 +52,7 @@ class World:
                 if new_npc_def.id == -1:
                     continue
 
-                if new_npc_def.id in self.npc_defs.keys():
+                if new_npc_def.id in self.npc_defs:
                     LogManager.get_logger().warn(f"The NPC {new_npc_def.name} has the same ID as "
                                                  f"{self.npc_defs[new_npc_def.id].name} (ID: "
                                                  f"{new_npc_def.id})\n{new_npc_def.name} was not loaded.")
@@ -82,8 +79,8 @@ class World:
             rooms[room_id] = room
 
         # Go through the room dictionary and add all the connections
-        directions = ["north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest", "up",
-                      "down"]
+        directions = ["north", "northeast", "east", "southeast", "south",
+        "southwest", "west", "northwest", "up", "down"]
         for room in rooms.values():
             room_dict = room.__dict__
             room_def_dict = room.room_def.__dict__
@@ -123,6 +120,6 @@ class World:
 
     def populate_world(self):
         """Instantiate the world based on the definitions"""
-        for region_id in self.region_defs.keys():
+        for region_id in self.region_defs:
             region = self.instantiate_region(region_id)
             self.regions[region_id] = region

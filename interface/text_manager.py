@@ -1,97 +1,88 @@
 from collections import deque
 
-
-import tkinter as tk
+import pygame as pg
 
 
 class TextToAdd:
     """Text to be added to the screen"""
 
-    def __init__(self, text: str, end: str):
+    def __init__(self, text: str, end: str = "\n"):
         """
         An object that stores text to add to the screen
-        :param str text: THe text to add
+        :param str text: The text to add
         :param str end: The character to append to the end of the text
         """
         self.text = text
         self.end = end
-        self.total_delay = 10
+        self.total_delay = 0
 
-
-class TextToTW(TextToAdd):
+class TextToTypewrite(TextToAdd):
     """Text to be typewritten to the screen"""
 
-    def __init__(self, text: str, delay: int, end: str):
+    def __init__(self, text: str, delay: int, end: str = "\n"):
         """
         An object that stores text to typewrite to the screen
-        :param str text: THe text to add
-        :param int delay: The delay between adding each character to the screen
+        :param str text: The text to add
+        :param int delay: The delay between adding each character to the screen (in milliseconds)
         :param str end: The character to append to the end of the text
         """
         super().__init__(text, end)
         self.delay = delay
-        self.total_delay = delay * len(text) + 250
-        self.running = False
-
+        self.current_index = 0
+        self.last_update_time = 0
+        self.typing_complete = False
 
 class TextManager:
-    """An object to manage the text that gets added to the textbox"""
+    """An object to manage the text that gets added to the screen"""
 
-    def __init__(self, game_window: tk.Tk, textbox: tk.Text):
+    def __init__(self, screen: pg.Surface, font: pg.font.Font, text_color: str):
         """
         Create a new Text Manager
-        :param tk.Tk root: The tkinter root associated with this text manager
-        :param tk.Text textbox: A textbox to add text to
+        :param pg.Surface screen: The PyGame screen surface
+        :param pg.font.Font font: The font to use for rendering text
+        :param str text_color: The color of the text
         """
-        self.game_window = game_window
-        self.textbox = textbox
+        self.screen = screen
+        self.font = font
+        self.text_color = text_color
         self.queue: deque[TextToAdd] = deque()
-        self.running = False
+        self.displayed_lines: list[pg.Surface] = []
+        self.line_spacing = 25
+        self.padding = 10
 
-    def add(self, text: TextToAdd):
+    def add(self, text_obj: TextToAdd):
         """
         Add text to the queue to be added to the screen
-        :param TextToAdd text: The text to be added to the queue
+        :param TextToAdd text_obj: The text object to be added to the queue
         """
-        self.running = True
-        delay = self.__get_total_delay()
-        self.queue.append(text)       
-        if isinstance(text, TextToTW):
-            self.game_window.after(delay, self.__typewrite_text, text)
-        elif isinstance(text, TextToAdd):
-            self.game_window.after(delay, self.__add_text, text)
+        self.queue.append(text_obj)
 
-    def __add_text(self, text: TextToAdd):
-        """
-        Display text to the text box
-        :param TextToAdd text: THe text to add to the text box
-        """
-        self.textbox.insert("end", text.text + text.end)
-        self.queue.remove(text)
-        if len(self.queue) == 0:
-            self.running = False
+    def update(self):
+        """Updates the display based on the text queue."""
+        new_lines = []
+        for item in list(self.queue):  # Iterate over a copy to allow removal
+            if isinstance(item, TextToTypewrite):
+                current_time = pg.time.get_ticks()
+                if not item.typing_complete and current_time - item.last_update_time > item.delay:
+                    item.current_index += 1
+                    item.last_update_time = current_time
+                    if item.current_index >= len(item.text):
+                        item.typing_complete = True
+                text_to_render = item.text[:item.current_index] + (item.end if item.typing_complete else "")
+                text_surface = self.font.render(text_to_render, True, self.text_color)
+                if item.typing_complete and item in self.queue:
+                    self.queue.remove(item)
+                new_lines.append(text_surface)
+            elif isinstance(item, TextToAdd):
+                text_surface = self.font.render(item.text + item.end, True, self.text_color)
+                new_lines.append(text_surface)
+                self.queue.remove(item)
+        self.displayed_lines.extend(new_lines)
 
-    def __typewrite_text(self, text: TextToTW, index: int = 0):
-        """
-        Typewrite text to the text box
-        :param TextToTW text: The text to be typewritten
-        :param index: The position of the character to add
-        """
-        self.textbox.insert("end", text.text[index])
-        index += 1
-        if index < len(text.text):
-            self.game_window.after(text.delay, self.__typewrite_text, text, index)
-        else:
-            # If there's nothing else to typewrite, add the ending character
-            self.textbox.insert("end", text.end)
-            self.queue.remove(text)
-            if len(self.queue) == 0:
-                self.running = False
-
-    def __get_total_delay(self) -> int:
-        """
-        Get the total delay for all current items in the queue
-        :rtype: int
-        :return: The total delay for all the TextToAdd objects in the queue
-        """
-        return sum([item.total_delay for item in self.queue])
+    def draw(self):
+        """Draws the currently displayed text on the screen."""
+        y_offset = self.screen.get_height() - 100  # Start drawing text above the input box
+        for line_surface in reversed(self.displayed_lines):
+            text_rect = line_surface.get_rect(bottomleft=(self.padding, y_offset))
+            self.screen.blit(line_surface, text_rect)
+            y_offset -= self.line_spacing

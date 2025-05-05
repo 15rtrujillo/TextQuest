@@ -1,6 +1,6 @@
+import pygame as pg
+
 from interface.game_window import GameWindow
-from interface.screens.numbered_menu_screen import NumberedMenuScreen
-from interface.screens.screen import Screen
 from model.entity.player import Player
 from model.world.world import World
 
@@ -13,34 +13,41 @@ class Game:
         """Create an instance of the game engine"""
         self.world: World = World()
         self.player: Player | None = None
-        self.window: GameWindow | None = None
-        self.current_screen: Screen | None = None
-        self.next_screen: Screen | None = None
-        self.current_tick = 0
+        self.window: GameWindow = GameWindow()
+        self.running = True
 
-    def play(self):
-        self.next_screen = self.main_menu()
-        self.game_window = GameWindow(self.tick)
-        self.game_window.mainloop()
+    def run(self):
+        """Run the main game loop"""
+        while self.running:
+            current_time = pg.time.get_ticks()
 
-    def tick(self):
-        self.current_tick += 1
+            # Events
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    self.running = False
+                elif event.type == pg.KEYDOWN:
+                    if event.key == pg.K_RETURN:
+                        self.window.get_text()
+                    elif event.key == pg.K_BACKSPACE:
+                        self.window.backspace_held = True
+                        self.window.backspace()
+                        # If backspace is held for longer than backspace_delay ms,
+                        # we want to start deleting multiple characters
+                        self.window.backspace_timer = current_time + self.window.backspace_delay
+                    else:
+                        self.window.key_typed(event.unicode)
+                elif event.type == pg.KEYUP:
+                    if event.key == pg.K_BACKSPACE:
+                        self.window.backspace_held = False
 
-        if self.next_screen is not None:
-            self.current_screen = self.next_screen
-            self.next_screen = None
-            self.game_window.append_to_screen(self.current_screen.text)
+            # Updates
+            self.window.update()
 
-        self.game_window.after(Game.TICK_RATE, self.tick)
+            # Drawing
+            self.window.draw()
+            pg.display.flip()
 
-    def main_menu(self) -> NumberedMenuScreen:
-        """
-        Create the main menu
-        :rtype: NumberedMenuScreen
-        :return: The main menu screen
-        """
-        menu = NumberedMenuScreen("Epic Quest: Text Quest\n\nMain Menu")
-        return menu
+        pg.quit()
 
 
 def parse_int_input(text_to_parse: str, number_of_choices: int = 0) -> int:

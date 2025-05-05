@@ -1,11 +1,10 @@
+import json
+
+import input_output.file_utils as file_utils
 from external.npc_def import NpcDef
 from external.region_def import RegionDef
 from external.room_def import RoomDef
 from input_output.logger.log_manager import LogManager
-
-
-import input_output.file_utils as file_utils
-import json
 
 
 def load_region_file(region_file_name: str) -> RegionDef | None:
@@ -23,17 +22,19 @@ def load_region_file(region_file_name: str) -> RegionDef | None:
     try:
         region_file = open(region_file_path, "r")
     except FileNotFoundError:
-        LogManager.get_logger().error(f"Could not open region file: {region_file_name} at {region_file_path}"
+        LogManager.get_logger().error(f"Could not open region file: {region_file_name}"
+                                      f" at {region_file_path}"
                                       f" - The file does not exist.")
         return None
-    
+
     # Attempt to load the JSON from file
     try:
         region_json = json.loads(region_file.read())
     except json.JSONDecodeError:
-        LogManager.get_logger().error(f"Error reading region file: {region_file_name} - The file is possibly corrupted.")
+        LogManager.get_logger().error(f"Error reading region file: {region_file_name}"
+                                      f" - The file is possibly corrupted.")
         return None
-    
+
     # Get the region's ID and name
     new_region = RegionDef(region_json["id"], region_json["name"])
 
@@ -41,19 +42,20 @@ def load_region_file(region_file_name: str) -> RegionDef | None:
     rooms = region_json["rooms"]
     for room in rooms:
         new_room = RoomDef()
-        
+
         # Loop through the key, value pairs in the room object
         for key, value in room.items():
             # Make sure we're only attempting to add good data
-            if key in new_room.__dict__.keys():
+            if key in new_room.__dict__:
                 new_room.__dict__[key] = value
-        
+
         # Add the new room to the region
         new_region.add_room_def(new_room)
 
     region_file.close()
 
-    LogManager.get_logger().info(f"Loaded {len(new_region.room_defs)} Room definitions from {region_file_name}")
+    LogManager.get_logger().info(f"Loaded {len(new_region.room_defs)} "
+                                 f"Room definitions from {region_file_name}")
 
     return new_region
 
@@ -76,15 +78,17 @@ def load_npc_file(npc_file_name: str) -> list[NpcDef] | None:
         LogManager.get_logger().error(f"Could not open NPC file: {npc_file_name} at {npc_file_path}"
                                       f" - The file does not exist.")
         return None
-    
+
     # Attempt to load the JSON from file
     try:
         npc_json = json.loads(npc_file.read())
     except json.JSONDecodeError:
-        LogManager.get_logger().error(f"Error reading NPC file: {npc_file_name} - The file is possibly corrupted.")
+        LogManager.get_logger().error(f"Error reading NPC file: {npc_file_name}"
+                                      f" - The file is possibly corrupted.")
         return None
-    
-    # The npc_json should be a list of JSON objects. We will loop through these objects and create NPCs
+
+    # The npc_json should be a list of JSON objects.
+    # We will loop through these objects and create NPCs
     npcs = []
     for npc in npc_json:
         new_npc = NpcDef()
@@ -92,9 +96,9 @@ def load_npc_file(npc_file_name: str) -> list[NpcDef] | None:
         # Loop through the key, value pairs in the Npc JSON object
         for key, value in npc.items():
             # Make sure we're only attempting to add good data
-            if key in new_npc.__dict__.keys():
+            if key in new_npc.__dict__:
                 new_npc.__dict__[key] = value
-        
+
         # Add the new room to the map
         npcs.append(new_npc)
 
@@ -106,7 +110,7 @@ def load_npc_file(npc_file_name: str) -> list[NpcDef] | None:
 
 
 if __name__ == "__main__":
-    """Try to read the test map file dumped from the Map class test to test map loader"""
+    # Try to read the test map file dumped from the Map class test to test map loader
     test_map = load_region_file("test_map.eqm")
 
     for key, value in test_map.__dict__.items():

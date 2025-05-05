@@ -1,3 +1,5 @@
+"""Contains functions and constants for helping with IO"""
+
 import os
 
 

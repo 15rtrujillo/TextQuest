@@ -1,66 +1,105 @@
-from typing import Callable
+import pygame as pg
+
+from interface.text_manager import TextManager, TextToAdd, TextToTypewrite
 
 
-import game
-import interface.text_manager as tm
-import tkinter as tk
-
-
-class GameWindow(tk.Tk):
+class GameWindow:
     """The main game window"""
 
-    def __init__(self, tick_function: Callable[[], None]):
+    def __init__(self):
         """Create the main game window"""
-        super().__init__()
-        self.title("Epic Quest: Text Quest")
-        self.configure(bg="#000")
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
-        
-        # Initialization event
-        self.bind("<Visibility>", lambda event: self.on_load())
-
-        self.text_frame = tk.Frame(self)
-        self.text_frame.grid(column=0, row=0, sticky="NSEW")
-
-        self.text_box = tk.Text(self.text_frame, bg="#000", fg="#FFF", font="Consolas 20", wrap="word")
-        self.text_box.bind("<Key>", lambda event: "break")
-        self.text_box.pack(fill="both", expand=True)
-
-        self.entry_frame = tk.Frame(self)
-        self.entry_frame.grid(column=0, row=1, sticky="NSEW")
-
-        self.entry_box = tk.Entry(self.entry_frame, bg="#000", fg="#FFF", font="Consolas 20")
-        self.entry_box.bind("<Return>", lambda _: self.get_text())
-        self.entry_box.pack(fill="both", expand=True)
-
         self.window_x = 960
         self.window_y = 540
+        self.screen = pg.display.set_mode((self.window_x, self.window_y))
+        pg.display.set_caption("Epic Quest: Text Quest")
+        self.bg_color = "black"
+        self.text_color = "white"
+        self.font = pg.font.SysFont("Consolas", 20)
+        self.input_text = ""
+        self.active = True
+        self.text_manager = TextManager(self.screen, self.font, self.text_color)
 
-        self.geometry(f"{self.window_x}x{self.window_y}")
+        # Insertion point
+        self.insertion_point_visible = True
+        self.insertion_point_last_blink = 0
+        self.insertion_point_interval = 500
+        self.insertion_point_height = self.font.get_linesize() - 18
+        self.insertion_point_width = 15
 
-        # Game stuff
-        self.text_manager = tm.TextManager(self, self.text_box)
-        self.tick_function = tick_function
+        # Backspace
+        self.backspace_held = False
+        self.backspace_timer = 0
+        self.backspace_delay = 200
+        self.backspace_repeat_rate = 50
 
-    def append_to_screen(self, text: str, end: str = "\n"):
-        self.text_manager.add(tm.TextToAdd(text, end))
 
-    def typewriter(self, text: str, char_delay: int, end: str):
-        self.text_manager.add(tm.TextToTW(text, char_delay, end))
+    def display_text(self, text: str, end: str = "\n"):
+        """
+        Adds text to the display log immediately.
+        :param str text: The text to add
+        :param str end: The character to append to the end of the text
+        """
+        self.text_manager.add(TextToAdd(text, end))
 
-    def clear_text(self):
-        self.text_box.delete("1.0", "end")
+    def display_typewritten_text(self, text: str, delay: int, end: str = "\n"):
+        """
+        Adds text to the queue to be displayed with a typewriting effect.
+        :param str text: The text to add
+        :param int delay: The delay between adding each character to the screen (in milliseconds)
+        :param str end: The character to append to the end of the text
+        """
+        self.text_manager.add(TextToTypewrite(text, delay, end))
 
-    def on_load(self):
-        """Triggered when the window has loaded"""
-        self.unbind("<Visibility>")
-        self.after(game.Game.TICK_RATE, self.tick_function)
+    def get_text(self) -> str:
+        """
+        Gets the current input text and clears the input.
+        :rtype: str
+        :return: The text the user has entered
+        """
+        submitted_text = self.input_text
+        self.input_text = ""
+        return submitted_text
 
-    def get_text(self):
-        """Called when the user presses enter on the text entry box"""
-        if self.text_manager.running:
-            return
-        self.entry_box.delete("0", "end")
-        
-        return self.entry_box.get()
+    def backspace(self):
+        """Called when the backspace key is pressed"""
+        if self.input_text:
+            self.input_text = self.input_text[:-1]
+
+    def key_typed(self, unicode: str):
+        """
+        Called when any alphanumeric key is pressed
+        :param str unicode: The unicode for the pressed key
+        """
+        self.input_text += unicode
+
+    def update(self):
+        """Update the window"""
+        current_time = pg.time.get_ticks()
+
+        self.text_manager.update()
+
+        # Blink insertion point
+        if current_time - self.insertion_point_last_blink > self.insertion_point_interval:
+            self.insertion_point_visible = not self.insertion_point_visible
+            self.insertion_point_last_blink = current_time
+
+        # Delete multiple characters
+        if self.backspace_held and current_time >= self.backspace_timer and self.input_text:
+            self.backspace()
+            self.backspace_timer = current_time + self.backspace_repeat_rate
+
+    def draw(self):
+        """Draws the screen"""
+        self.screen.fill(self.bg_color)
+        self.text_manager.draw()
+
+        # Display the input text
+        input_surface = self.font.render(f"> {self.input_text}", True, self.text_color)
+        input_rect = input_surface.get_rect(bottomleft=(10, self.window_y - 10))
+        self.screen.blit(input_surface, input_rect)
+
+        if self.insertion_point_visible:
+            cursor_x = input_rect.right + 2
+            cursor_y = input_rect.top + 10
+            pg.draw.rect(self.screen, self.text_color, (cursor_x, cursor_y,
+            self.insertion_point_width, self.insertion_point_height))
