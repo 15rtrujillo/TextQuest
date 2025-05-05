@@ -40,7 +40,7 @@ class Logger:
         :param str message_type: The type of message to log. Will be prefixed to the message
         :param str message: The message to be logged
         """
-        log_message = f"[{self.__get_timestamp()}] [{message_type}] {message}\n"
+        log_message = f"[{self._get_timestamp()}] [{message_type}] {message}\n"
 
         # If debug mode is on, we will print log messages to the console as well as to file
         if Logger.DEBUG:
@@ -50,7 +50,7 @@ class Logger:
             log_file.write(log_message)
 
     @staticmethod
-    def __get_timestamp() -> str:
+    def _get_timestamp() -> str:
         """
         Get the current timestamp
         :rtype: str

@@ -1,10 +1,13 @@
 from game import Game
-from game import Game
+
+
+import pygame as pg
 
 
 def main():
+    pg.init()
     game = Game()
-    game.play()
+    game.run()
 
 
 if __name__ == "__main__":
