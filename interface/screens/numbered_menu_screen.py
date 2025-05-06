@@ -1,90 +1,38 @@
+from abc import abstractmethod
+
+from interface.screens.error_screen import InfoScreen
 from interface.screens.screen import Screen
-from typing import Callable
 
 
 class NumberedMenuScreen(Screen):
     """A numbered menu where the user can select a specific option"""
 
-    def __init__(self, text: str, options: dict[str, Screen | Callable[[str], None]] | None = None):
+    def __init__(self, prompt: str, *options: str):
         """
         Create a menu that displays a list of numbered options to the user
-        :param str text: The text for the menu, not including the options
-        :param dict[str, Screen | Callable[[str], None]] | None options: The possible options the user can select
-        and the associated outcome.
+        :param str prompt: The text for the menu, not including the options
+        :param tuple[str] options: The possible options the user can select.
         Do not number the options.
         """
-        super().__init__(text)
-        self.options = options
-        if self.options is not None:
-            for option in self.get_numbered_options():
-                self.text += (option + "\n")
+        self.number_of_choices = len(options)
+        super().__init__(*(prompt.split("\n") + [f"{i + 1}. {options[i]}" for i in range(self.number_of_choices)]))
 
-    def get_numbered_options(self) -> list[str] | None:
+    @abstractmethod
+    def process_choice(self, choice: int) -> Screen:
         """
-        Get the list of options, numbered
-        :rtype: list[str] | None
-        :return: A list of the options with numbers prepended or None if there are no options
+        Handle input from the user
+        :param int choice: The user's numerical input
+        :rtype: Screen
+        :return: The next screen to transition to
         """
-        numbered_options = []
-        if self.options is None:
-            return None
+        pass
 
-        for i in range(len(self.options)):
-            option_text = list(self.options.keys())[i]
-            numbered_options.append(f"{i + 1}. {option_text}")
-
-        return numbered_options
-
-    def get_options_count(self) -> int:
-        """
-        Get how many options are presented on this menu
-        :rtype: int
-        :return: A count of how many options are present for this menu
-        """
-        if self.options is None:
-            return 0
-        return len(self.options)
-
-    def get_next_screen(self, choice: int) -> Screen | None:
-        """
-        Gets the next screen associated with the selected option.
-        :param int choice: The option selected by the user
-        :rtype: Screen | None
-        :return: The next screen to show based on the user's selection or None if there is no associated Screen
-        """
+    def process_input(self, user_input: str) -> Screen:
         try:
-            option = list(self.options.keys())[choice-1]
-        except IndexError:
-            return None
-        if isinstance(self.options[option], Screen):
-            return self.options[option]
-        return None
-
-    def get_next_function(self, choice: int) -> Callable[[str], None] | None:
-        """
-        Gets the function associated with the selected option.
-        :param int choice: The option selected by the user
-        :rtype: Callable[[str], None] | None
-        :return: The function to call based on the user's selection or None if there is no associated function
-        """
-        try:
-            option = list(self.options.keys())[choice]
-        except IndexError:
-            return None
-        if isinstance(self.options[option], Callable):
-            return self.options[option]
-        return None
-
-    def add_option(self, option: str, next_action: Screen | Callable[[str], None]):
-        """
-        Add a new option to the menu
-        :param str option: The option to add
-        :param Screen | Callable[[str], None] next_action: The screen to be shown or the function to be called
-        if the user selects this option
-        """
-        if self.options is None:
-            self.options = dict()
-        self.options[option] = next_action
-
-        number = self.get_options_count()
-        self.text += f"{number}. {option}\n"
+            int_input = int(user_input)
+            if int_input in range(1, self.number_of_choices + 1):
+                return self.process_choice(int_input)
+            else:
+                return InfoScreen(f"Please enter a number within the range 1-{self.number_of_choices}", return_screen=self)
+        except ValueError:
+            return InfoScreen(f"Please enter a number", return_screen=self)

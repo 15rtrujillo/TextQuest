@@ -1,4 +1,3 @@
-import abc
 from abc import ABC, abstractmethod
 
 
@@ -8,12 +7,19 @@ class Screen(ABC):
     def __init__(self, *text: str):
         """
         Create a new Screen
-        :param str text: The text to display on the screen
+        :param str text: The text to display on the screen.
+        Each element will be on a new line.
         """
         self.text = list(text)
 
     @abstractmethod
-    def process_input(self, user_input: str):
+    def process_input(self, user_input: str) -> "Screen":
+        """
+        Handle input from the user
+        :param str user_input: The user's input
+        :rtype: Screen
+        :return: The next screen to transition to
+        """
         pass
 
 

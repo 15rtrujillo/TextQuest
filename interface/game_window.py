@@ -47,6 +47,10 @@ class GameWindow:
         """
         self.text_manager.add(TextToTypewrite(text, delay))
 
+    def clear(self):
+        """Clear the screen of all text"""
+        self.text_manager.clear()
+
     def get_text(self) -> str:
         """
         Gets the current input text and clears the input.

@@ -57,6 +57,7 @@ class TextManager:
         self.queue.append(text_to_add)
 
     def clear(self):
+        """Clear the text manager"""
         self.queue.clear()
         self.displayed_lines.clear()
 

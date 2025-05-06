@@ -1,6 +1,7 @@
 import pygame as pg
 
 from interface.game_window import GameWindow
+from interface.menus.main_menu import MainMenu
 from interface.screens.screen import Screen
 from model.entity.player import Player
 from model.world.world import World
@@ -15,9 +16,11 @@ class Game:
         self.world = World()
         self.window = GameWindow()
         self.player: Player | None = None
-        self.current_screen: Screen | None = None
+        self.current_screen: Screen = MainMenu()
         self.next_screen: Screen | None = None
         self.running = True
+
+        self.display_current_screen()
 
     def run(self):
         """Run the main game loop"""
@@ -29,7 +32,7 @@ class Game:
                 if event.type == pg.QUIT:
                     self.running = False
                 elif event.type == pg.KEYDOWN:
-                    if event.key == pg.K_RETURN:
+                    if event.key == pg.K_RETURN or event.key == pg.K_KP_ENTER:
                         self.process_input(self.window.get_text())
                     elif event.key == pg.K_BACKSPACE:
                         self.window.backspace_held = True
@@ -52,29 +55,20 @@ class Game:
 
         pg.quit()
 
+    def display_current_screen(self):
+        self.window.clear()
+        for line in self.current_screen.text:
+            self.window.display_text(line)
+
     def process_input(self, user_input: str):
-        self.window.display_typewritten_text(user_input)
-
-
-def parse_int_input(text_to_parse: str, number_of_choices: int = 0) -> int:
-    """
-    Parses int input
-    :param str text_to_parse: The text to parse
-    :param int number_of_choices: If this is not 0, the parsed int will be range checked form one to this value
-    (inclusive)
-    :rtype: int
-    :return: The user's input as an int. -1 will be returned if the input is invalid in some way
-    """
-    try:
-        int_input = int(text_to_parse)
-        if number_of_choices == -1:
-            return int_input
-        if int_input in range(1, number_of_choices + 1):
-            return int_input
+        if self.current_screen:
+            self.next_screen = self.current_screen.process_input(user_input)
+            if self.next_screen:
+                self.current_screen = self.next_screen
+                self.next_screen = None
+                self.display_current_screen()
         else:
-            return -1
-    except ValueError:
-        return -1
+            raise RuntimeError("No current screen")
 
 
 def validate_text_input(text_to_validate: str, allowed_responses: list[str],
