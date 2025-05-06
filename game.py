@@ -12,9 +12,9 @@ class Game:
 
     def __init__(self):
         """Create an instance of the game engine"""
-        self.world: World = World()
+        self.world = World()
+        self.window = GameWindow()
         self.player: Player | None = None
-        self.window: GameWindow = GameWindow()
         self.current_screen: Screen | None = None
         self.next_screen: Screen | None = None
         self.running = True

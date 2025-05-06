@@ -1,15 +1,20 @@
-from abc import ABC
+import abc
+from abc import ABC, abstractmethod
 
 
 class Screen(ABC):
     """The abstract base class for screens"""
 
-    def __init__(self, text: str):
+    def __init__(self, *text: str):
         """
         Create a new Screen
         :param str text: The text to display on the screen
         """
-        self.text = text 
+        self.text = list(text)
+
+    @abstractmethod
+    def process_input(self, user_input: str):
+        pass
 
 
 """

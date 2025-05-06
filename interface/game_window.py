@@ -99,4 +99,4 @@ class GameWindow:
             cursor_x = input_rect.right + 2
             cursor_y = input_rect.top + 10
             pg.draw.rect(self.screen, self.text_color, (cursor_x, cursor_y,
-            self.insertion_point_width, self.insertion_point_height))
+                                                        self.insertion_point_width, self.insertion_point_height))
