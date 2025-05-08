@@ -111,12 +111,12 @@ def load_npc_file(npc_file_name: str) -> list[NpcDef] | None:
 
 if __name__ == "__main__":
     # Try to read the test map file dumped from the Map class test to test map loader
-    test_map = load_region_file("test_map.eqm")
+    test_map = load_region_file("test_map.tqm")
 
     for key, value in test_map.__dict__.items():
         print(key, value)
 
-    test_npcs = load_npc_file("test_npcs.eqn")
+    test_npcs = load_npc_file("test_npcs.tqn")
 
     for npc in test_npcs:
         print(npc)

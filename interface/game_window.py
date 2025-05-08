@@ -1,4 +1,5 @@
 import pygame as pg
+from constants import game_info
 
 from interface.text_manager import TextManager, TextToAdd, TextToTypewrite
 
@@ -11,7 +12,7 @@ class GameWindow:
         self.window_x = 960
         self.window_y = 540
         self.screen = pg.display.set_mode((self.window_x, self.window_y))
-        pg.display.set_caption("Epic Quest: Text Quest")
+        pg.display.set_caption(f"{game_info.TITLE}: {game_info.SUBTITLE}")
         self.bg_color = "black"
         self.text_color = "white"
         self.font = pg.font.SysFont("Consolas", 20)

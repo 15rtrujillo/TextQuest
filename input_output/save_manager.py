@@ -50,18 +50,18 @@ def get_saves() -> list[str]:
 
     player_names = []
     for file in save_files:
-        if file.find(".eq") == -1:
+        if file.find(".sav") == -1:
             continue
-        player_names.append(file[:file.find(".eq")])
+        player_names.append(file[:file.find(".sav")])
     return player_names
 
 
 def save(player: Player):
     """
-    Save a player to a binary file at \"[player_name].eq\"
+    Save a player to a binary file at \"[player_name].sav\"
     :param Player player: The player to save
     """
-    save_file_name = file_utils.get_file_path(file_utils.get_saves_directory(), f"{player.name}.eq")
+    save_file_name = file_utils.get_file_path(file_utils.get_saves_directory(), f"{player.name}.sav")
 
     with open(save_file_name, "wb") as save_file:
         save_data = b""
@@ -81,7 +81,7 @@ def load(name: str) -> Player | None:
     :rtype: Player | None
     :return: A Player if the load was successful or None otherwise
     """
-    save_file_name = file_utils.get_file_path(file_utils.get_saves_directory(), f"{name}.eq")
+    save_file_name = file_utils.get_file_path(file_utils.get_saves_directory(), f"{name}.sav")
 
     loaded_data: dict[str, bytes] = dict()
 

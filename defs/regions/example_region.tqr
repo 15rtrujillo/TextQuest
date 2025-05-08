@@ -1,11 +1,11 @@
 {
-    "id": -1,
-    "name": "",
+    "id": 0,
+    "name": "Example Region",
     "rooms": [
         {
-            "id": -1,
-            "name": "",
-            "description": "",
+            "id": 0,
+            "name": "Example Room",
+            "description": "This is an example room",
             "n": -1,
             "ne": -1,
             "e": -1,
@@ -16,7 +16,7 @@
             "nw": -1,
             "up": -1,
             "down": -1,
-            "npc_ids": [],
+            "npc_ids": [0],
             "items": []
         }
     ]

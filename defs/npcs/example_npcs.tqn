@@ -1,0 +1,9 @@
+[
+    {
+        "id": 0,
+        "name": "Example NPC",
+        "description": "This is an example NPC",
+        "max_hp": 100,
+        "attackable": false
+    }
+]

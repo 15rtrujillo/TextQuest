@@ -11,5 +11,5 @@ class LogManager:
     def get_logger() -> Logger:
         """Get the logger instance"""
         if LogManager.__logger is None:
-            LogManager.__logger = Logger(futils.get_file_path(futils.BASE_DIRECTORY, "epicquest.log"))
+            LogManager.__logger = Logger(futils.get_file_path(futils.BASE_DIRECTORY, "textquest.log"))
         return LogManager.__logger
